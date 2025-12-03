@@ -155,7 +155,6 @@ class MainActivity : AppCompatActivity() {
     // ---------- LÓGICA BLUETOOTH ----------
 
     private fun inicializarBluetooth() {
-        // Registramos el receiver SOLO una vez que hay permisos
         val filter = IntentFilter().apply {
             addAction(BluetoothDevice.ACTION_FOUND)
             addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)
@@ -245,7 +244,6 @@ class MainActivity : AppCompatActivity() {
                     val texto = String(buffer, 0, bytes)
                     acumulador += texto
 
-                    // Procesamos mensajes que terminen con ';'
                     var fin = acumulador.indexOf(';')
                     while (fin != -1) {
                         val trama = acumulador.substring(0, fin + 1)
@@ -266,14 +264,22 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun procesarTrama(trama: String) {
-        // Esperamos algo como: #TEMP:24.5;
-        if (trama.startsWith("#TEMP:")) {
-            val valor = trama.substringAfter("#TEMP:").substringBefore(";")
+        val limpia = trama.trim()
+
+        runOnUiThread {
+            txtEstado.text = "Trama: $limpia"
+        }
+
+        if (limpia.startsWith("#AGUA:")) {
+            val estado = limpia.substringAfter("#AGUA:").substringBefore(";")
+
             runOnUiThread {
-                txtValor.text = "$valor °C"
+                txtValor.text = estado
             }
         }
     }
+
+
 
     private fun desconectar() {
         leyendo = false
